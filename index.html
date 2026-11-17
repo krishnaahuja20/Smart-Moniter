@@ -1,75 +1,571 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BijliMonitor Dashboard</title><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmartMonitor | Energy Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-:root{--bg:#0b1220;--card:#142238;--line:#293c57;--txt:#edf5ff;--muted:#9bb0ca;--cyan:#51c9e8;--green:#42d6a3;--amber:#ffd078}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(140deg,#122b48,#09111e 48%);color:var(--txt);font:15px system-ui,Arial}.wrap{max-width:1200px;margin:auto;padding:20px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.brand{font-size:23px;font-weight:800}.muted{color:var(--muted);font-size:12px}.status,.pill{border:1px solid var(--line);border-radius:30px;padding:8px 12px;color:var(--muted);font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:linear-gradient(150deg,#182a43,#111d30);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}.label{color:var(--muted);font-size:12px}.value{font-size:28px;font-weight:800;margin:8px 0}.unit{font-size:13px;color:var(--muted)}.row2{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-top:12px}.chart{height:260px}h2{font-size:16px;margin:0 0 12px}.item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:12px}.item:last-child{border:0}input,select{width:100%;padding:10px;background:#0b1728;color:var(--txt);border:1px solid var(--line);border-radius:8px}label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}button{padding:10px 15px;background:#138eaf;color:white;border:0;border-radius:8px;font-weight:700;margin-top:12px}.bill{font-size:32px;font-weight:800;margin:12px 0}.note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:18px}
-@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.settings{grid-template-columns:1fr 1fr}}@media(max-width:500px){.wrap{padding:12px}.grid{gap:8px}.card{padding:12px}.value{font-size:23px}.settings{grid-template-columns:1fr}}
-</style></head><body><main class="wrap">
-<header><div><div class="brand">⚡ BijliMonitor</div><div class="muted">SMART HOME ENERGY · DHBVN · HARYANA</div></div><div class="status" id="status">● Waiting for cloud data</div></header>
+:root {
+  --bg:#07111f;
+  --panel:#101f33;
+  --line:#263d57;
+  --text:#eff6ff;
+  --muted:#9db1c9;
+  --cyan:#48d5e8;
+  --green:#45d6a0;
+  --orange:#ffbd69;
+  --red:#ff7185;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:radial-gradient(ellipse at 12% 0%,#17385a 0,transparent 42%),
+  linear-gradient(135deg,#081321,#0b1728 55%,#07111f);
+  color:var(--text);
+  font:15px Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  min-height:100vh;
+}
+.wrap {max-width:1320px;margin:auto;padding:28px 24px 36px}
+.top {display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+.brand {display:flex;align-items:center;gap:13px}
+.logo {
+  width:48px;height:48px;border-radius:15px;
+  background:linear-gradient(145deg,#3dd5e5,#1884b7);
+  display:grid;place-items:center;color:#062033;
+  font-size:25px;font-weight:900;
+}
+.brand h1 {font-size:25px;letter-spacing:-.8px;margin:0}
+.sub {font-size:11px;letter-spacing:2px;color:var(--muted);margin-top:4px}
+.status {border:1px solid var(--line);background:#102238;border-radius:30px;padding:10px 15px;font-size:12px;color:var(--muted)}
+.dot {display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-right:8px}
+.status.ok .dot {background:var(--green);box-shadow:0 0 12px #45d6a0}
+.section-title {font-size:12px;letter-spacing:1.6px;color:var(--muted);margin:24px 0 12px;text-transform:uppercase}
+.grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card {
+  background:linear-gradient(150deg,#152943ef,#0e1c30f5);
+  border:1px solid var(--line);border-radius:19px;padding:19px;
+  box-shadow:0 12px 30px #00000018;min-width:0;
+}
+.metric {position:relative;overflow:hidden;min-height:140px}
+.metric:after {
+  content:"";position:absolute;width:100px;height:100px;
+  border-radius:50%;right:-35px;top:-42px;background:#48d5e811;
+}
+.label {font-size:11px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
+.value {font-size:clamp(25px,3vw,34px);font-weight:800;letter-spacing:-1px;margin:14px 0 5px;white-space:nowrap}
+.unit {font-size:12px;color:var(--muted)}
+.accent {color:var(--cyan)}
+.green {color:var(--green)}
+.orange {color:var(--orange)}
+.main-grid {display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-top:14px}
+.card h2 {font-size:16px;margin:0 0 15px}
+.chartbox {height:285px;position:relative}
+.bill-card {background:linear-gradient(145deg,#163b50,#10243a 72%);border-color:#286078}
+.bill-amount {font-size:clamp(36px,5vw,52px);font-weight:850;letter-spacing:-1.8px;margin:18px 0 4px}
+.bill-caption {font-size:12px;color:#b7d0e0}
+.bill-rows {margin-top:22px}
+.bill-row {display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #ffffff18;font-size:13px}
+.bill-row:last-child {border:0}
+.pill {display:inline-block;border:1px solid #ffffff22;border-radius:30px;padding:6px 10px;color:#b8d4e7;font-size:11px}
+.insight {display:flex;align-items:center;justify-content:space-between;gap:15px}
+.insight strong {display:block;font-size:15px;margin-bottom:6px}
+.insight p {margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.insight-icon {width:46px;height:46px;border-radius:14px;background:#48d5e818;color:var(--cyan);display:grid;place-items:center;font-size:23px;flex-shrink:0}
+.bottom-grid {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.minirow {display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.minirow:last-child {border:0}
+.muted {color:var(--muted)}
+.foot {font-size:11px;color:#8298b2;line-height:1.7;margin-top:20px}
+@media(max-width:900px) {
+  .grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .main-grid,.bottom-grid {grid-template-columns:1fr}
+}
+@media(max-width:520px) {
+  .wrap {padding:17px 12px 28px}
+  .grid {gap:9px}
+  .card {padding:14px;border-radius:15px}
+  .metric {min-height:125px}
+  .value {font-size:25px}
+  .brand h1 {font-size:22px}
+  .chartbox {height:240px}
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">ϟ</div>
+    <div>
+      <h1>SmartMonitor</h1>
+      <div class="sub">SMART ENERGY · DHBVN · HARYANA</div>
+    </div>
+  </div>
+  <div class="status" id="status">
+    <span class="dot"></span>Connecting to energy meter
+  </div>
+</header>
+
+<div class="section-title">Live energy overview</div>
+
 <section class="grid">
-<div class="card"><div class="label">LIVE VOLTAGE</div><div class="value" id="v">--</div><div class="muted">Volts</div></div>
-<div class="card"><div class="label">LIVE CURRENT</div><div class="value" id="a">--</div><div class="muted">Amperes</div></div>
-<div class="card"><div class="label">LIVE POWER</div><div class="value" id="p">--</div><div class="muted">Watts</div></div>
-<div class="card"><div class="label">POWER FACTOR</div><div class="value" id="pf">--</div><div class="muted" id="hz">Frequency -- Hz</div></div>
+  <article class="card metric">
+    <div class="label">Live power</div>
+    <div class="value accent" id="power">-- W</div>
+    <div class="unit">Current electricity load</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">Voltage</div>
+    <div class="value" id="voltage">-- V</div>
+    <div class="unit">Supply voltage</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">Current</div>
+    <div class="value" id="current">-- A</div>
+    <div class="unit">Instant current draw</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">Power factor</div>
+    <div class="value" id="pf">--</div>
+    <div class="unit" id="frequency">Frequency -- Hz</div>
+  </article>
 </section>
-<section class="grid" style="margin-top:12px">
-<div class="card"><div class="label">TODAY'S ENERGY</div><div class="value" id="today">--</div><div class="muted">kWh, from available today's samples</div></div>
-<div class="card"><div class="label">THIS MONTH</div><div class="value" id="month">--</div><div class="muted">kWh from ESP32 counter</div></div>
-<div class="card"><div class="label">TWO-MONTH HISTORY</div><div class="value" id="two">--</div><div class="muted">kWh, if history is available</div></div>
-<div class="card"><div class="label">MONTH-END FORECAST</div><div class="value" id="forecast">--</div><div class="muted">kWh projection</div></div></section>
-<section class="row2">
-<div class="card"><h2>Daily consumption trend</h2><div class="chart"><canvas id="chart"></canvas></div></div>
-<div class="card"><h2>DHBVN estimated bill</h2><span class="pill">FY 2026–27 · indicative only</span><div class="bill" id="bill">Set category</div><div class="muted" id="billnote">Confirm sanctioned load from your electricity bill.</div><div class="item"><span>Energy charge</span><b id="energy">--</b></div><div class="item"><span>Fixed charge</span><b id="fixed">--</b></div><div class="item"><span>Total estimate</span><b id="billtotal">--</b></div></div>
+
+<div class="section-title">Consumption & cost prediction</div>
+
+<section class="grid">
+  <article class="card metric">
+    <div class="label">Today's energy</div>
+    <div class="value" id="today">-- kWh</div>
+    <div class="unit">From today's cloud samples</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">This month's energy</div>
+    <div class="value" id="month">-- kWh</div>
+    <div class="unit">Meter monthly counter</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">Predicted monthly energy</div>
+    <div class="value orange" id="forecast">-- kWh</div>
+    <div class="unit">Based on month-to-date usage</div>
+  </article>
+
+  <article class="card metric">
+    <div class="label">Predicted DHBVN bill</div>
+    <div class="value green" id="rupees">₹ --</div>
+    <div class="unit">Estimated monthly amount</div>
+  </article>
 </section>
-<section class="row2">
-<div class="card"><h2>Appliance pattern insights</h2><div class="muted">Whole-house power pattern only; not confirmed appliance identification.</div><div id="appliances" class="item">Waiting for readings</div></div>
-<div class="card"><h2>Meter & cloud status</h2><div class="item"><span>Total meter energy</span><b id="total">--</b></div><div class="item"><span>Last update</span><b id="last">--</b></div><div class="item"><span>Samples loaded</span><b id="count">0</b></div></div>
+
+<section class="main-grid">
+
+  <article class="card">
+    <h2>Daily energy consumption</h2>
+    <div class="chartbox">
+      <canvas id="chart"></canvas>
+    </div>
+  </article>
+
+  <article class="card bill-card">
+    <span class="pill">DHBVN · Domestic Category II estimate</span>
+
+    <div class="bill-amount" id="billBig">₹ --</div>
+    <div class="bill-caption">Projected bill for current month</div>
+
+    <div class="bill-rows">
+      <div class="bill-row">
+        <span>Projected units</span>
+        <b id="billUnits">-- kWh</b>
+      </div>
+      <div class="bill-row">
+        <span>Estimated energy charges</span>
+        <b id="energyCharge">₹ --</b>
+      </div>
+      <div class="bill-row">
+        <span>Estimated fixed charge</span>
+        <b id="fixedCharge">₹ --</b>
+      </div>
+      <div class="bill-row">
+        <span>Last meter update</span>
+        <b id="lastUpdate">--</b>
+      </div>
+    </div>
+  </article>
+
 </section>
-<section class="card" style="margin-top:12px"><h2>Settings</h2><div class="settings">
-<div><label>ThingSpeak channel</label><input id="channel" value="3570407"></div>
-<div><label>Read API key (private channel only)</label><input id="readkey" type="password" placeholder="Optional for public channel"></div>
-<div><label>Refresh interval</label><select id="refresh"><option value="20000">20 seconds</option><option value="30000">30 seconds</option><option value="60000">1 minute</option></select></div>
-<div><label>DHBVN category</label><select id="category"><option value="">Not confirmed</option><option value="II">Category II (load up to 5 kW)</option><option value="III">Category III (above 5 kW)</option><option value="I">Category I (up to 2 kW)</option></select></div>
-<div><label>Sanctioned load (kW)</label><input id="load" type="number" step=".1" min=".1" placeholder="From your bill"></div>
-<div><label>Fixed charge</label><select id="fixedmode"><option value="yes">Include published fixed charge</option><option value="no">Exclude fixed charge</option></select></div></div>
-<button id="save">Save settings & refresh</button><button id="refreshNow" style="background:#314661;margin-left:8px">Refresh now</button><span class="muted" id="saved"></span></section>
-<div class="note">Daily and two-month totals require retained cloud samples and cannot reconstruct periods before logging began. Appliance insights are heuristic: one PZEM measures combined load and cannot distinguish AC, TV, laptop charger, refrigerator, etc. Bill estimate excludes duty, fuel adjustment, taxes, arrears, rebates and other bill-specific items. Confirm the current DHBVN tariff and your sanctioned load from your bill. Software alerts are not electrical protection. Keep the ThingSpeak WRITE key only in ESP32 firmware. A public channel can be read by anyone who knows its channel ID.</div>
+
+<section class="bottom-grid">
+
+  <article class="card">
+    <h2>Power usage insight</h2>
+    <div class="insight">
+      <div>
+        <strong id="loadLabel">Waiting for readings</strong>
+        <p id="loadText">Live load pattern will appear here when the meter sends data.</p>
+      </div>
+      <div class="insight-icon">ϟ</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Meter connection</h2>
+    <div class="minirow">
+      <span class="muted">ThingSpeak channel</span>
+      <b>3584085</b>
+    </div>
+    <div class="minirow">
+      <span class="muted">Cloud samples loaded</span>
+      <b id="sampleCount">0</b>
+    </div>
+    <div class="minirow">
+      <span class="muted">Auto refresh</span>
+      <b>20 seconds</b>
+    </div>
+    <div class="minirow">
+      <span class="muted">Meter energy total</span>
+      <b id="meterTotal">-- kWh</b>
+    </div>
+  </article>
+
+</section>
+
+<p class="foot">
+SmartMonitor uses live readings from one whole-house PZEM meter.
+Appliance/load descriptions are pattern-based estimates, not confirmed
+appliance identification. Bill prediction uses indicative DHBVN Domestic
+Category II slab rates and assumes 5 kW sanctioned load for applicable
+fixed charges. It excludes electricity duty, FSA, taxes, arrears,
+rebates and other bill-specific adjustments. Verify against your actual
+DHBVN bill. Two-month history requires separate long-term data storage.
+</p>
+
 </main>
+
 <script>
-const $=id=>document.getElementById(id);let timer=null,plot=null;
-function cfg(){return {channel:$("channel").value.trim()||"3570407",key:$("readkey").value.trim(),refresh:+$("refresh").value,cat:$("category").value,load:+$("load").value,fixed:$("fixedmode").value};}
-function save(){localStorage.setItem("bijlimonitor",JSON.stringify(cfg()));$("saved").textContent="Saved in this browser";start();}
-function init(){try{let s=JSON.parse(localStorage.getItem("bijlimonitor")||"{}");for(let k of ["channel","readkey","refresh","cat","load","fixed"])if(s[k]!==undefined)$(({cat:"category",fixed:"fixedmode"})[k]||k).value=s[k];}catch(e){}}
-const n=x=>{let v=parseFloat(x);return Number.isFinite(v)?v:NaN},f=(x,d=2)=>Number.isFinite(x)?x.toFixed(d):"--";
-function calcBill(u,s){
- if(!s.cat)return null;
- let slabs=[],fixedRate=0;
- if(s.cat==="II"){slabs=[[150,2.95],[300,5.25],[500,6.45],[Infinity,7.10]];fixedRate=u>300?50:0;}
- else if(s.cat==="III"){slabs=[[500,6.50],[1000,7.15],[Infinity,7.50]];fixedRate=75;}
- else return {error:"Category I rates need confirmation from your current DHBVN bill."};
- let remaining=u,prev=0,energy=0;for(let [cap,rate] of slabs){let qty=Math.max(0,Math.min(remaining,cap-prev));energy+=qty*rate;remaining-=qty;prev=cap;if(remaining<=0)break;}
- let fixed=s.fixed==="no"?0:fixedRate*(s.load||0);return {energy,fixed,total:energy+fixed};
+// =======================================
+// SMARTMONITOR THINGSPEAK CONFIGURATION
+// =======================================
+
+const CHANNEL_ID = "3584085";
+
+// PUBLIC CHANNEL: leave this empty.
+// PRIVATE CHANNEL: paste your READ API KEY here.
+const READ_API_KEY = "PX3HGI4DRAJ0WJ9M";
+
+// Automatic refresh interval
+const REFRESH_MS = 20000;
+
+// =======================================
+
+const $ = id => document.getElementById(id);
+
+const num = value => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : NaN;
+};
+
+const fmt = (value,digits=2) => {
+  return Number.isFinite(value) ? value.toFixed(digits) : "--";
+};
+
+let chart = null;
+
+// DHBVN indicative Domestic Category II estimate.
+// Verify current rates and fixed charges against your bill.
+function estimateDHBVN(units) {
+
+  const slabs = [
+    [150,2.95],
+    [300,5.25],
+    [500,6.45],
+    [Infinity,7.10]
+  ];
+
+  let remaining = Math.max(0,units);
+  let previous = 0;
+  let energy = 0;
+
+  for (const [limit,rate] of slabs) {
+
+    const qty = Math.max(
+      0,
+      Math.min(remaining,limit-previous)
+    );
+
+    energy += qty*rate;
+    remaining -= qty;
+    previous = limit;
+
+    if (remaining <= 0) break;
+  }
+
+  // Assumed 5 kW sanctioned load for this estimate.
+  const fixed = units > 300 ? 50*5 : 0;
+
+  return {
+    energy,
+    fixed,
+    total:energy+fixed
+  };
 }
-function draw(rows){
- let last=rows[rows.length-1],vol=n(last.field1),amp=n(last.field2),w=n(last.field3),total=n(last.field4),freq=n(last.field5),pf=n(last.field6),mon=n(last.field7);
- $("v").textContent=f(vol,1)+" V";$("a").textContent=f(amp,2)+" A";$("p").textContent=f(w,1)+" W";$("pf").textContent=f(pf,2);$("hz").textContent="Frequency "+f(freq,1)+" Hz";
- $("month").textContent=f(mon,2)+" kWh";$("total").textContent=f(total,3)+" kWh";$("last").textContent=new Date(last.created_at).toLocaleString();$("count").textContent=rows.length;$("status").textContent="● ThingSpeak connected";
- let map={};for(let x of rows){let e=n(x.field4),d=new Date(x.created_at);if(!Number.isFinite(e)||isNaN(d))continue;let key=d.toLocaleDateString("en-CA");if(!map[key])map[key]={first:e,last:e};map[key].last=Math.max(map[key].last,e);}
- let days=Object.entries(map).sort().map(([d,x])=>({d,k:Math.max(0,x.last-x.first)})),todayKey=new Date().toLocaleDateString("en-CA"),today=days.find(x=>x.d===todayKey)?.k;
- $("today").textContent=f(today,3)+" kWh";
- let now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),recent=rows.filter(x=>new Date(x.created_at)>=monthStart),first=recent.length?n(recent[0].field4):NaN;
- let currentDelta=Number.isFinite(first)?Math.max(0,total-first):NaN,elapsed=now.getDate(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
- $("forecast").textContent=f(currentDelta/Math.max(1,elapsed)*dim,2)+" kWh";
- let cutoff=new Date(now.getFullYear(),now.getMonth()-1,1),old=rows.filter(x=>new Date(x.created_at)>=cutoff),oldFirst=old.length?n(old[0].field4):NaN;
- $("two").textContent=f(Number.isFinite(oldFirst)?Math.max(0,total-oldFirst):NaN,2)+" kWh";
- let bill=calcBill(mon,cfg());if(!bill){$("bill").textContent="Select category";$("billnote").textContent="Category and sanctioned load are not confirmed.";$("energy").textContent="--";$("fixed").textContent="--";$("billtotal").textContent="--";}else if(bill.error){$("bill").textContent="Tariff check needed";$("billnote").textContent=bill.error;}else{$("bill").textContent="₹"+f(bill.total,0);$("billnote").textContent="Indicative energy + fixed charges only.";$("energy").textContent="₹"+f(bill.energy);$("fixed").textContent="₹"+f(bill.fixed);$("billtotal").textContent="₹"+f(bill.total);}
- let label=w<8?"Standby / very small electronics":w<35?"Possible phone/laptop charger or LED lights":w<120?"Possible TV, fan or several small loads":w<450?"Possible refrigerator cycling or medium load":w<1200?"Possible heavy appliance / AC at partial load":"Possible AC, heater or other high-power load";
- $("appliances").innerHTML="<div><b>"+label+"</b><br><span class='muted'>Current combined load: "+f(w,0)+" W. Pattern guess only.</span></div>";
- if(plot)plot.destroy();plot=new Chart($("chart"),{type:"bar",data:{labels:days.slice(-30).map(x=>x.d.slice(5)),datasets:[{label:"Daily kWh (approx.)",data:days.slice(-30).map(x=>x.k),backgroundColor:"#51c9e8",borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#c5d5e8"}}},scales:{x:{ticks:{color:"#9bb0ca"},grid:{color:"#293c57"}},y:{beginAtZero:true,ticks:{color:"#9bb0ca"},grid:{color:"#293c57"}}}}});
+
+// Daily consumption from cumulative energy samples.
+function buildDaily(rows) {
+
+  const daily = {};
+
+  rows.forEach(row => {
+
+    const energy = num(row.field4);
+    const date = new Date(row.created_at);
+
+    if (!Number.isFinite(energy) || isNaN(date.getTime())) return;
+
+    const key =
+      date.getFullYear()+"-"+
+      String(date.getMonth()+1).padStart(2,"0")+"-"+
+      String(date.getDate()).padStart(2,"0");
+
+    if (!daily[key]) {
+      daily[key] = {
+        first:energy,
+        last:energy
+      };
+    }
+
+    daily[key].first = Math.min(daily[key].first,energy);
+    daily[key].last = Math.max(daily[key].last,energy);
+  });
+
+  return Object.entries(daily)
+    .sort(([a],[b])=>a.localeCompare(b))
+    .map(([date,x])=>({
+      date,
+      kwh:Math.max(0,x.last-x.first)
+    }));
 }
-async function fetchFeeds(){let s=cfg(),url=`https://api.thingspeak.com/channels/${encodeURIComponent(s.channel)}/feeds.json?results=8000`;if(s.key)url+="&api_key="+encodeURIComponent(s.key);try{let r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);let j=await r.json(),rows=(j.feeds||[]).filter(x=>x.field1!==null);if(!rows.length)throw Error("No channel feeds yet");draw(rows);}catch(e){$("status").textContent="● Cloud read error: "+e.message;}}
-function start(){if(timer)clearInterval(timer);fetchFeeds();timer=setInterval(fetchFeeds,cfg().refresh);}
-$("save").onclick=save;$("refreshNow").onclick=fetchFeeds;init();start();
-</script></body></html>
+
+// Consumption chart.
+function drawChart(days) {
+
+  const shown = days.slice(-14);
+
+  if (chart) chart.destroy();
+
+  chart = new Chart($("chart"), {
+
+    type:"bar",
+
+    data:{
+      labels:shown.map(x=>x.date.slice(5)),
+
+      datasets:[{
+        label:"Daily kWh",
+        data:shown.map(x=>x.kwh),
+        backgroundColor:"#48d5e8",
+        borderRadius:7,
+        maxBarThickness:38
+      }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+
+      plugins:{
+        legend:{
+          labels:{color:"#c8d8e9"}
+        }
+      },
+
+      scales:{
+        x:{
+          ticks:{color:"#9db1c9"},
+          grid:{display:false}
+        },
+        y:{
+          beginAtZero:true,
+          ticks:{color:"#9db1c9"},
+          grid:{color:"#263d57"}
+        }
+      }
+    }
+  });
+}
+
+// Whole-house power pattern estimate.
+function updateLoadInsight(watts) {
+
+  let title,description;
+
+  if (watts < 8) {
+    title="Very low power usage";
+    description="The connected load is currently near standby level.";
+  }
+  else if (watts < 80) {
+    title="Light home load";
+    description="The total draw may represent lighting, chargers, fans or other small devices.";
+  }
+  else if (watts < 400) {
+    title="Moderate home load";
+    description="Several small appliances or one medium appliance may be running.";
+  }
+  else if (watts < 1200) {
+    title="High home load";
+    description="A larger appliance may be operating. Check which devices are switched on.";
+  }
+  else {
+    title="Heavy power usage";
+    description="High combined load detected. Check high-power appliances and wiring capacity.";
+  }
+
+  $("loadLabel").textContent=title;
+
+  $("loadText").textContent=
+    description+" This is a whole-house estimate, not appliance recognition.";
+}
+
+// Display ThingSpeak data.
+function render(rows) {
+
+  const latest = rows[rows.length-1];
+
+  const watts=num(latest.field3);
+  const volts=num(latest.field1);
+  const amps=num(latest.field2);
+  const pf=num(latest.field6);
+  const hz=num(latest.field5);
+  const total=num(latest.field4);
+  const monthUnits=num(latest.field7);
+
+  $("power").textContent=fmt(watts,1)+" W";
+  $("voltage").textContent=fmt(volts,1)+" V";
+  $("current").textContent=fmt(amps,2)+" A";
+  $("pf").textContent=fmt(pf,2);
+
+  $("frequency").textContent=
+    "Frequency "+fmt(hz,1)+" Hz";
+
+  $("meterTotal").textContent=
+    fmt(total,3)+" kWh";
+
+  $("month").textContent=
+    fmt(monthUnits,3)+" kWh";
+
+  $("lastUpdate").textContent=
+    new Date(latest.created_at).toLocaleString();
+
+  $("sampleCount").textContent=rows.length;
+
+  // Today's energy.
+  const days=buildDaily(rows);
+
+  const now=new Date();
+
+  const todayKey=
+    now.getFullYear()+"-"+
+    String(now.getMonth()+1).padStart(2,"0")+"-"+
+    String(now.getDate()).padStart(2,"0");
+
+  const today=days.find(x=>x.date===todayKey);
+
+  $("today").textContent=
+    fmt(today ? today.kwh : 0,3)+" kWh";
+
+  // Monthly forecast.
+  const day=now.getDate();
+
+  const daysInMonth=
+    new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+
+  const projectedUnits=
+    Math.max(0,monthUnits/Math.max(1,day)*daysInMonth);
+
+  $("forecast").textContent=
+    fmt(projectedUnits,1)+" kWh";
+
+  // DHBVN estimated bill.
+  const bill=estimateDHBVN(projectedUnits);
+
+  const amount=
+    "₹ "+Math.round(bill.total).toLocaleString("en-IN");
+
+  $("rupees").textContent=amount;
+  $("billBig").textContent=amount;
+
+  $("billUnits").textContent=
+    fmt(projectedUnits,1)+" kWh";
+
+  $("energyCharge").textContent=
+    "₹ "+Math.round(bill.energy).toLocaleString("en-IN");
+
+  $("fixedCharge").textContent=
+    "₹ "+Math.round(bill.fixed).toLocaleString("en-IN");
+
+  updateLoadInsight(Number.isFinite(watts)?watts:0);
+
+  drawChart(days);
+
+  $("status").classList.add("ok");
+
+  $("status").innerHTML=
+    '<span class="dot"></span>Live cloud connected';
+}
+
+// Fetch data from ThingSpeak.
+async function refresh() {
+
+  let url =
+    `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=8000`;
+
+  // Add Read API Key only when provided.
+  if (READ_API_KEY.trim() !== "") {
+    url += `&api_key=${encodeURIComponent(READ_API_KEY.trim())}`;
+  }
+
+  try {
+
+    const response=await fetch(url,{cache:"no-store"});
+
+    if (!response.ok) {
+      throw new Error("HTTP "+response.status);
+    }
+
+    const data=await response.json();
+
+    const rows=(data.feeds||[]).filter(row =>
+      row.field1 !== null && row.field3 !== null
+    );
+
+    if (!rows.length) {
+      throw new Error("No readings received yet");
+    }
+
+    render(rows);
+
+  } catch(error) {
+
+    $("status").classList.remove("ok");
+
+    $("status").innerHTML=
+      '<span class="dot"></span>'+error.message;
+  }
+}
+
+// Start dashboard.
+refresh();
+setInterval(refresh,REFRESH_MS);
+
+</script>
+</body>
+</html>
