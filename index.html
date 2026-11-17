@@ -163,7 +163,7 @@ body {
   <article class="card metric">
     <div class="label">Predicted DHBVN bill</div>
     <div class="value green" id="rupees">₹ --</div>
-    <div class="unit">Estimated monthly amount</div>
+    <div class="unit">Estimated monthly amount (including paise)</div>
   </article>
 </section>
 
@@ -180,7 +180,7 @@ body {
     <span class="pill">DHBVN · Domestic Category II estimate</span>
 
     <div class="bill-amount" id="billBig">₹ --</div>
-    <div class="bill-caption">Projected bill for current month</div>
+    <div class="bill-caption">Projected bill for current month · indicative estimate</div>
 
     <div class="bill-rows">
       <div class="bill-row">
@@ -276,6 +276,15 @@ const num = value => {
 
 const fmt = (value,digits=2) => {
   return Number.isFinite(value) ? value.toFixed(digits) : "--";
+};
+
+// Display estimated currency with paise instead of rounding to whole rupees.
+const money = value => {
+  if (!Number.isFinite(value)) return "₹ --";
+  return "₹ " + value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 };
 
 let chart = null;
@@ -497,8 +506,7 @@ function render(rows) {
   // DHBVN estimated bill.
   const bill=estimateDHBVN(projectedUnits);
 
-  const amount=
-    "₹ "+Math.round(bill.total).toLocaleString("en-IN");
+  const amount=money(bill.total);
 
   $("rupees").textContent=amount;
   $("billBig").textContent=amount;
@@ -506,11 +514,9 @@ function render(rows) {
   $("billUnits").textContent=
     fmt(projectedUnits,1)+" kWh";
 
-  $("energyCharge").textContent=
-    "₹ "+Math.round(bill.energy).toLocaleString("en-IN");
+  $("energyCharge").textContent=money(bill.energy);
 
-  $("fixedCharge").textContent=
-    "₹ "+Math.round(bill.fixed).toLocaleString("en-IN");
+  $("fixedCharge").textContent=money(bill.fixed);
 
   updateLoadInsight(Number.isFinite(watts)?watts:0);
 
